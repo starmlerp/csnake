@@ -1,0 +1,6 @@
+*.o
+*.a
+a.out
+*.swp
+tags
+main
