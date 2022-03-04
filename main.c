@@ -5,8 +5,8 @@
 #include <term.h>
 #include <curses.h>
 
-#define REFRESH_INTERVAL 0.5
-#define INIT_LEN 3 // mustnt be greater than half the terminal height
+#define REFRESH_INTERVAL 0.3
+#define INIT_LEN 5 // mustnt be greater than half the terminal height
 #define BORDER_LOOP // should the snake loop on the border?
 
 #define HEAD  'O'
@@ -39,7 +39,6 @@ void endgame(void){
 
 int main(void){
 	initscr();
-	getch();
 	nconfig();
 
 	struct snake head;
@@ -74,45 +73,68 @@ int main(void){
 				return 0;
 			break;
 			case 'w':
+			if(x!=1){
 				x = -1;
 				y =  0;
+			}
 			break;
-
 			case 'a':
+			if(y!=1){
 				x =  0;
 				y = -1;
+			}
 			break;
 			case 's':
+			if(x!=-1){
 				x =  1;
 				y =  0;
+			}
 			break;
 			case 'd':
+			if(y!=-1){
 				x =  0;
 				y =  1;
+			}
 			break;
 		}
 	
-		if(head.x+x == fruit.x && head.y+y == fruit.y){
-			struct snake *i;
-			for(i = &head; i->tail; i=i->tail);
-			i->tail = (struct snake*)malloc(sizeof(struct snake));
-			score++;
-			fruit.x = ((double)rand() / RAND_MAX) * LINES;
-			fruit.y = ((double)rand() / RAND_MAX) * COLS;
-			for(struct snake *i = &head; i; i = i->tail)
-				if(i->x == fruit.x && i->y == fruit.y){
-					fruit.x = ((double)rand() / RAND_MAX) * LINES;
-					fruit.y = ((double)rand() / RAND_MAX) * COLS;
-					i = &head;
-				}
-		}
-
 		struct snake last = head;
 		struct snake *i;
 		for(i = &head; i; i=i->tail){
 			if(i == &head){
 				i->x+=x;
 				i->y+=y;
+				
+				#ifdef BORDER_LOOP
+				if(head.x < 0) head.x = LINES - 1;
+				if(head.x > LINES - 1) head.x = 0;
+
+				if(head.y < 0) head.y = COLS - 1;
+				if(head.y > COLS - 1) head.y = 0;
+				#else
+				if(head.x < 0 ||
+				   head.x > LINES - 1 ||
+				   head.y < 0 ||
+				   head.y > COLS - 1){
+					endgame();
+					return 0;
+				}
+				#endif
+				if(i->x == fruit.x && i->y == fruit.y){
+					struct snake *j;
+					for(j = &head; j->tail; j=j->tail);
+					j->tail = (struct snake*)malloc(sizeof(struct snake));
+					score++;
+					fruit.x = ((double)rand() / RAND_MAX) * LINES;
+					fruit.y = ((double)rand() / RAND_MAX) * COLS;
+					for(j = &head; j; j = j->tail)
+						if(j->x == fruit.x && j->y == fruit.y){
+							fruit.x = ((double)rand() / RAND_MAX) * LINES;
+							fruit.y = ((double)rand() / RAND_MAX) * COLS;
+							j = &head;
+					}
+				}
+
 			}
 			else{
 				struct snake holder;
@@ -129,22 +151,6 @@ int main(void){
 				return 0;
 			}
 		}
-
-		#ifdef BORDER_LOOP
-		if(head.x < 0) head.x = LINES - 1;
-		if(head.x > LINES - 1) head.x = 0;
-
-		if(head.y < 0) head.y = COLS - 1;
-		if(head.y > COLS - 1) head.y = 0;
-		#else
-		if(head.x < 0 ||
-		   head.x > LINES - 1 ||
-		   head.y < 0 ||
-		   head.y > COLS - 1){
-			endgame();
-			return 0;
-		}
-		#endif
 
 		mvaddch(fruit.x, fruit.y, FRUIT);
 		for(struct snake *i = &head; i->tail; i=i->tail){
