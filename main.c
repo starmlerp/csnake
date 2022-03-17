@@ -24,6 +24,7 @@ int sleep( int ms ){
 	do{
 		d = nanosleep(&t, NULL);
 	}while(d);
+	return 0;
 }
 #endif
 #ifdef __WIN32
@@ -174,8 +175,7 @@ int main(void){
 			mvaddch(i->x, i->y, (i==&head?HEAD:TAIL));
 		}
 		refresh();
-		sleep((REFRESH_INTERVAL) * 1000 );
-//		while((float)(clock() - timer) / CLOCKS_PER_SEC < REFRESH_INTERVAL);
+		sleep((REFRESH_INTERVAL - (float)(clock() - timer) / CLOCKS_PER_SEC) * 1000 );
 	}
 	return 0;
 }
