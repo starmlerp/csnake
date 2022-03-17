@@ -13,11 +13,28 @@
 #define TAIL  '#'
 #define FRUIT 'o'
 
+#ifdef __linux__
+#include <errno.h>
+int sleep( int ms ){
+	if(ms <= 0)return 0;
+	struct timespec t;
+	int d;
+	t.tv_sec = (double)ms / 1000;
+	t.tv_nsec = (double)( ms % 1000) * 1000000;
+	do{
+		d = nanosleep(&t, NULL);
+	}while(d);
+}
+#endif
+#ifdef __WIN32
+#define sleep(n) Sleep(n)
+#endif
+
 int score = 0;
 
 struct snake {
 	int x, y;
-	snake* tail;
+	struct snake *tail;
 
 };
 
@@ -157,7 +174,8 @@ int main(void){
 			mvaddch(i->x, i->y, (i==&head?HEAD:TAIL));
 		}
 		refresh();
-		while((float)(clock() - timer) / CLOCKS_PER_SEC < REFRESH_INTERVAL);
+		sleep((REFRESH_INTERVAL) * 1000 );
+//		while((float)(clock() - timer) / CLOCKS_PER_SEC < REFRESH_INTERVAL);
 	}
 	return 0;
 }

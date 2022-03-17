@@ -1,11 +1,13 @@
 TARGET = main
 
+$CC = x86_64-w64-mingw32-gcc
+
 CPPFLAGS = -lcurses
 
 all: $(TARGET) tags
 
-$(TARGET): $(TARGET).c
-	$(CXX) $(CPPFLAGS) -o $(TARGET) $(TARGET).c
+$(TARGET): $(TARGET).c makefile
+	$(CC) $(CPPFLAGS) -o $(TARGET) $(TARGET).c
 
 tags: $(TARGET).c $(HEDS)
 	ctags $^
